@@ -1,0 +1,42 @@
+@using API.Entities
+@using Frontend.Services
+
+@rendermode InteractiveServer
+@inject NavigationManager _nav
+
+@page "/customers/add"
+
+<h3>Add a Customer</h3>
+<EditForm Model=@Customer OnSubmit="@AddCustomer">
+    <label>First Name
+        <InputText @bind-Value="Customer.FirstName" />
+    </label><br />
+    <label>Middle Name
+        <InputText @bind-Value="Customer.MiddleName" />
+    </label><br />
+    <label>Surname
+        <InputText @bind-Value="Customer.Surname" />
+    </label><br />
+    <button type="submit" class="btn btn-success">Submit</button>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private Customer? Customer { get; set; }
+    
+    protected override void OnInitialized() => Customer ??= new();
+    
+    public async void AddCustomer()
+    {
+        var customer = new Customer()
+        { 
+            Id = Guid.NewGuid(),
+            FirstName = Customer.FirstName ?? null,
+            MiddleName = Customer.MiddleName ?? null,
+            Surname = Customer.Surname ?? null,
+            CreatedDateTime = DateTime.Now
+        };
+        var result = await CustomerServices.AddCustomer(customer);
+        _nav.NavigateTo("/customers/");
+    }
+}

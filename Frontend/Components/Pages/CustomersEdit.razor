@@ -1,0 +1,48 @@
+@using API.Entities
+@using Frontend.Services
+
+@rendermode InteractiveServer
+@inject NavigationManager _nav
+
+@page "/customers/edit/{id}"
+
+<h3>Edit a Customer</h3>
+<EditForm Model=@Customer OnSubmit="@EditCustomer">
+    <label>First Name
+        <InputText @bind-Value="@Customer.FirstName" />
+    </label><br />
+    <label>Middle Name
+        <InputText @bind-Value="@Customer.MiddleName" />
+    </label><br />
+    <label>Surname
+        <InputText @bind-Value="@Customer.Surname" />
+    </label><br />
+    <button type="submit" class="btn btn-success">Submit</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    
+    [SupplyParameterFromForm]
+    public Customer Customer { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Customer = await CustomerServices.GetCustomer(new Guid(id));
+    }
+    
+    public async void EditCustomer()
+    {
+        var customer = new Customer()
+        {
+            Id = new Guid(id),
+            FirstName = Customer.FirstName ?? null,
+            MiddleName = Customer.MiddleName ?? null,
+            Surname = Customer.Surname ?? null,
+            EditedDateTime = DateTime.Now
+        };
+        await CustomerServices.EditCustomer(customer);
+        _nav.NavigateTo("/customers/");
+    }
+}

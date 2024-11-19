@@ -1,0 +1,75 @@
+@using API.Entities
+@using Frontend.Services
+
+@rendermode InteractiveServer
+@inject NavigationManager _nav
+
+@page "/customers"
+
+<div>
+    <button @onclick="@(()=> _nav.NavigateTo("/customers/add"))" class="btn btn-outline-primary">Add Customer</button>
+</div>
+<div>
+        <div>
+            <table class="table-bordered">
+                <thead>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Surname</th>
+                <th> </th>
+                </thead>
+                <tbody>
+                @foreach (var customer in customers)
+                {
+                    <tr>
+                        <td>@customer.FirstName</td>
+                        <td>@customer.MiddleName</td>
+                        <td>@customer.Surname</td>
+                        <td>
+                            <div>
+                                <button @onclick="@(()=> _nav.NavigateTo($"/customers/edit/{customer.Id.ToString()}"))" class="btn btn-primary" >Edit</button>
+                                <button @onclick="@(() => DeleteCustomer(customer))" class="btn btn-outline-danger" >Delete</button>
+                                <button @onclick="@(() => HardDeleteCustomer(customer))" class="btn btn-danger" >Hard Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+</div>
+
+
+@code
+{
+    public List<Customer> customers { get; set; } = new List<Customer>();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetCustomers();
+        StateHasChanged();
+        return base.OnInitializedAsync();
+    }
+    
+    public async Task<List<Customer>> GetCustomers()
+    {
+        var result = await CustomerServices.GetCustomers();
+        customers = result;
+        StateHasChanged();
+        return customers;
+    }
+
+    public async Task DeleteCustomer(Customer customer)
+    {
+        await CustomerServices.DeleteCustomer(customer.Id);
+        GetCustomers();
+        StateHasChanged();
+    }
+
+    public async Task HardDeleteCustomer(Customer customer)
+    {
+        await CustomerServices.HardDeleteCustomer(customer.Id);
+        GetCustomers();
+        StateHasChanged();
+    }
+}
